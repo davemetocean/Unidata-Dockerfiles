@@ -1,0 +1,123 @@
+#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:t arch:headline author:t c:nil
+#+OPTIONS: creator:nil d:(not "LOGBOOK") date:t e:t email:nil f:t inline:t
+#+OPTIONS: num:t p:nil pri:nil prop:nil stat:t tags:t tasks:t tex:t timestamp:t
+#+OPTIONS: title:t toc:t todo:t |:t
+#+TITLE: setup
+#+DATE: <2016-05-04 Wed>
+#+AUTHOR: Julien Chastang
+#+EMAIL: chastang@ucar.edu
+#+LANGUAGE: en
+#+SELECT_TAGS: export
+#+EXCLUDE_TAGS: noexport
+#+CREATOR: Emacs 24.5.1 (Org mode 8.3.4)
+
+#+PROPERTY: tangle "./setup.sh"
+
+#+BEGIN_SRC sh :eval no :shebang "#!/bin/bash"
+  set -x 
+#+END_SRC
+
+Create a new ~unidata~ user
+
+#+BEGIN_SRC sh :eval no
+  sudo adduser unidata
+#+END_SRC
+
+Add ~unidata~ user to sudoers
+
+#+BEGIN_SRC sh :eval no
+  sudo adduser unidata sudo
+#+END_SRC
+
+Create a ~docker~ group, if one does not exist already
+
+#+BEGIN_SRC sh :eval no
+  sudo groupadd docker
+#+END_SRC
+
+Add the ~unidata~ user to the ~docker~ group
+
+#+BEGIN_SRC sh :eval no
+  sudo usermod -aG docker unidata
+#+END_SRC
+
+Update and install some stuff
+
+#+BEGIN_SRC sh :eval no
+  sudo apt-get -qq update
+  sudo apt-get -qq install apt-transport-https ca-certificates
+#+END_SRC
+
+Add a new gpg key
+
+#+BEGIN_SRC sh :eval no
+  sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 \
+    --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+#+END_SRC
+
+#+BEGIN_SRC sh :eval no
+  echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" |
+sudo tee --append /etc/apt/sources.list.d/docker.list  > /dev/null
+#+END_SRC
+
+More updating
+
+#+BEGIN_SRC sh :eval no
+  sudo apt-get -qq update
+#+END_SRC
+
+Purge the old repo if it exists.
+
+#+BEGIN_SRC sh :eval no
+  sudo apt-get -qq purge lxc-docker
+#+END_SRC
+
+Verify that APT is pulling from the right repository.
+
+#+BEGIN_SRC sh :eval no
+  sudo apt-cache policy docker-engine
+#+END_SRC
+
+#+BEGIN_SRC sh :eval no
+  sudo apt-get -qq update
+  sudo apt-get install linux-image-extra-$(uname -r)
+  sudo apt-get install apparmor
+#+END_SRC
+
+More updating
+
+#+BEGIN_SRC sh :eval no
+  sudo apt-get -qq update
+#+END_SRC
+
+Install Docker.
+
+#+BEGIN_SRC sh :eval no
+  sudo apt-get -qq install docker-engine
+#+END_SRC
+
+Start Docker
+
+#+BEGIN_SRC sh :eval no
+  sudo service docker start
+#+END_SRC
+
+
+You will also need to add or alter the following the last line in =/etc/ssh/sshd_config=
+
+#+BEGIN_SRC sh :eval no :tangle no
+  AllowGroups root users unidata
+#+END_SRC
+
+Create a data volume via the Jetstream web interface
+
+#+BEGIN_SRC sh :eval no :tangle no
+  cd /
+
+  sudo umount vol1
+
+  sudo mkdir /data 
+
+  sudo mount /dev/sdb /data
+#+END_SRC
+
